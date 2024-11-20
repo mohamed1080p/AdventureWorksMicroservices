@@ -167,68 +167,133 @@ Project Structure
 
 
 
-AdventureWorks Microservices
-Project Overview
-The AdventureWorksMicroservices project is a microservices-based application designed to manage AdventureWorks data, including customers, orders, and inventory. The project leverages modern technologies to create a robust and scalable solution.
-Technology Stack
+-------------------------------------------------------------------------------------------------------------------
+#!/bin/bash
 
-Backend: ASP.NET Core Web API
-Database: MS SQL Server
-Containerization: Docker, Docker Compose
-CI/CD: Jenkins
-Version Control: GitHub
-ORM: Entity Framework Core
-Documentation: Swagger
+# AdventureWorks Microservices Setup Script
 
-Prerequisites
-Before you begin, ensure you have the following installed:
+# Color codes for better readability
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
-Git
-.NET Core SDK
-MS SQL Server
-Docker Desktop
-Jenkins (optional for CI/CD setup)
-
-Getting Started
-1. Clone the Repository
-bashCopygit clone https://github.com/yourusername/AdventureWorksMicroservices.git
-cd AdventureWorksMicroservices
-2. Version Control Setup
-bashCopygit init
-echo "bin/ obj/ *.log *.db" > .gitignore
-git add .
-git commit -m "Initialize project with README and .gitignore"
-3. Database Setup
-
-Install MS SQL Server
-Download the AdventureWorks sample database from Microsoft
-Attach the database using SQL Server Management Studio (SSMS)
-
-4. Configure REST API
-
-Open the project in Visual Studio
-Update the connection string in appsettings.json:
-
-jsonCopy"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Database=AdventureWorks;User Id=your_username;Password=your_password;"
+# Function to print status messages
+print_status() {
+    echo -e "${GREEN}[✓] $1${NC}"
 }
 
-Restore and run the application:
+print_warning() {
+    echo -e "${YELLOW}[!] $1${NC}"
+}
 
-bashCopydotnet restore
-dotnet run
-5. Docker Containerization
-Create Dockerfile for REST API
-Create a Dockerfile in the project folder:
-dockerfileCopyFROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+print_error() {
+    echo -e "${RED}[✗] $1${NC}"
+}
+
+# Check Prerequisites
+check_prerequisites() {
+    print_status "Checking Prerequisites..."
+    
+    # Check Git
+    if ! command -v git &> /dev/null; then
+        print_error "Git is not installed"
+        exit 1
+    fi
+
+    # Check .NET Core SDK
+    if ! command -v dotnet &> /dev/null; then
+        print_error ".NET Core SDK is not installed"
+        exit 1
+    fi
+
+    # Check Docker
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is not installed"
+        exit 1
+    fi
+
+    print_status "All prerequisites are met!"
+}
+
+# Clone Repository
+clone_repository() {
+    print_status "Cloning Repository..."
+    
+    # Prompt for GitHub username
+    read -p "Enter your GitHub username: " USERNAME
+    
+    git clone https://github.com/$USERNAME/AdventureWorksMicroservices.git
+    cd AdventureWorksMicroservices
+    
+    print_status "Repository cloned successfully!"
+}
+
+# Setup Version Control
+setup_version_control() {
+    print_status "Setting up Version Control..."
+    
+    # Initialize Git
+    git init
+    
+    # Create .gitignore
+    echo "bin/
+obj/
+*.log
+*.db" > .gitignore
+    
+    # Add and commit initial files
+    git add .
+    git commit -m "Initialize project with README and .gitignore"
+    
+    print_status "Version control setup complete!"
+}
+
+# Configure Connection String
+configure_connection_string() {
+    print_status "Configuring Connection String..."
+    
+    # Prompt for database credentials
+    read -p "Enter SQL Server username: " DB_USER
+    read -sp "Enter SQL Server password: " DB_PASSWORD
+    echo
+    
+    # Update appsettings.json (assumes file exists)
+    sed -i "s|\"DefaultConnection\": \".*\"|\"DefaultConnection\": \"Server=localhost;Database=AdventureWorks;User Id=$DB_USER;Password=$DB_PASSWORD;\"|g" appsettings.json
+    
+    print_status "Connection string updated!"
+}
+
+# Build and Run Application
+build_and_run_application() {
+    print_status "Building and Restoring Application..."
+    
+    dotnet restore
+    dotnet build
+    
+    print_warning "Start the application? (y/n)"
+    read START_APP
+    if [[ $START_APP == "y" ]]; then
+        dotnet run
+    fi
+}
+
+# Create Docker Files
+create_docker_files() {
+    print_status "Creating Docker Configuration..."
+    
+    # Create Dockerfile
+    cat > Dockerfile << EOL
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
 EXPOSE 80
 COPY . .
-ENTRYPOINT ["dotnet", "YourApiProjectName.dll"]
-Pull MS SQL Server Docker Image
-bashCopydocker pull mcr.microsoft.com/mssql/server
-Create docker-compose.yml
-yamlCopyversion: '3.8'
+ENTRYPOINT ["dotnet", "AdventureWorksMicroservices.dll"]
+EOL
+
+    # Create docker-compose.yml
+    cat > docker-compose.yml << EOL
+version: '3.8'
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server
@@ -246,20 +311,34 @@ services:
       ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=AdventureWorks;User Id=sa;Password=YourStrong@Passw0rd;"
     ports:
       - "8080:80"
-Build and Run Containers
-bashCopydocker-compose up --build
-6. Optional: CI/CD with Jenkins
+EOL
 
-Install Jenkins
-Configure GitHub Integration
+    print_status "Docker configuration files created!"
+}
 
-Go to repository Settings > Webhooks
-Add webhook with Jenkins URL
+# Build and Run Docker Containers
+run_docker_containers() {
+    print_warning "Build and run Docker containers? (y/n)"
+    read RUN_DOCKER
+    
+    if [[ $RUN_DOCKER == "y" ]]; then
+        # Pull MS SQL Server Docker image
+        docker pull mcr.microsoft.com/mssql/server
+        
+        # Build and run containers
+        docker-compose up --build
+    fi
+}
 
-
-
-Sample Jenkinsfile
-groovyCopypipeline {
+# Optional Jenkins Pipeline Configuration
+setup_jenkins_pipeline() {
+    print_warning "Set up Jenkins pipeline? (y/n)"
+    read SETUP_JENKINS
+    
+    if [[ $SETUP_JENKINS == "y" ]]; then
+        # Create Jenkinsfile
+        cat > Jenkinsfile << EOL
+pipeline {
     agent any
     stages {
         stage('Build') {
@@ -279,22 +358,32 @@ groovyCopypipeline {
         }
     }
 }
-Architecture Overview
+EOL
+        
+        print_status "Jenkinsfile created! Configure in your Jenkins instance."
+    fi
+}
 
-API Service: ASP.NET Core Web API for CRUD operations
-Database Service: MS SQL Server hosting the AdventureWorks database
-Containerization: Docker for application and database
-CI/CD Pipeline: Jenkins automates build and deployment
+# Main Script Execution
+main() {
+    clear
+    echo "AdventureWorks Microservices Setup Script"
+    echo "========================================"
+    
+    check_prerequisites
+    clone_repository
+    setup_version_control
+    configure_connection_string
+    build_and_run_application
+    create_docker_files
+    run_docker_containers
+    setup_jenkins_pipeline
+    
+    print_status "Setup Complete! Happy Coding!"
+}
 
-Accessing the Application
-
-API Endpoint: http://localhost:8080
-Swagger Documentation: http://localhost:8080/swagger (if configured)
-
-Contributing
-Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
-License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+# Run the main script
+main
 
 
 
