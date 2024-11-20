@@ -167,7 +167,134 @@ Project Structure
 
 
 
+AdventureWorks Microservices
+Project Overview
+The AdventureWorksMicroservices project is a microservices-based application designed to manage AdventureWorks data, including customers, orders, and inventory. The project leverages modern technologies to create a robust and scalable solution.
+Technology Stack
 
+Backend: ASP.NET Core Web API
+Database: MS SQL Server
+Containerization: Docker, Docker Compose
+CI/CD: Jenkins
+Version Control: GitHub
+ORM: Entity Framework Core
+Documentation: Swagger
+
+Prerequisites
+Before you begin, ensure you have the following installed:
+
+Git
+.NET Core SDK
+MS SQL Server
+Docker Desktop
+Jenkins (optional for CI/CD setup)
+
+Getting Started
+1. Clone the Repository
+bashCopygit clone https://github.com/yourusername/AdventureWorksMicroservices.git
+cd AdventureWorksMicroservices
+2. Version Control Setup
+bashCopygit init
+echo "bin/ obj/ *.log *.db" > .gitignore
+git add .
+git commit -m "Initialize project with README and .gitignore"
+3. Database Setup
+
+Install MS SQL Server
+Download the AdventureWorks sample database from Microsoft
+Attach the database using SQL Server Management Studio (SSMS)
+
+4. Configure REST API
+
+Open the project in Visual Studio
+Update the connection string in appsettings.json:
+
+jsonCopy"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost;Database=AdventureWorks;User Id=your_username;Password=your_password;"
+}
+
+Restore and run the application:
+
+bashCopydotnet restore
+dotnet run
+5. Docker Containerization
+Create Dockerfile for REST API
+Create a Dockerfile in the project folder:
+dockerfileCopyFROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+WORKDIR /app
+EXPOSE 80
+COPY . .
+ENTRYPOINT ["dotnet", "YourApiProjectName.dll"]
+Pull MS SQL Server Docker Image
+bashCopydocker pull mcr.microsoft.com/mssql/server
+Create docker-compose.yml
+yamlCopyversion: '3.8'
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+  
+  api:
+    build: .
+    depends_on:
+      - sqlserver
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=AdventureWorks;User Id=sa;Password=YourStrong@Passw0rd;"
+    ports:
+      - "8080:80"
+Build and Run Containers
+bashCopydocker-compose up --build
+6. Optional: CI/CD with Jenkins
+
+Install Jenkins
+Configure GitHub Integration
+
+Go to repository Settings > Webhooks
+Add webhook with Jenkins URL
+
+
+
+Sample Jenkinsfile
+groovyCopypipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'dotnet build AdventureWorksMicroservices.sln'
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t adventureworks-api .'
+            }
+        }
+        stage('Deploy to Staging') {
+            steps {
+                sh 'docker-compose up --build -d'
+            }
+        }
+    }
+}
+Architecture Overview
+
+API Service: ASP.NET Core Web API for CRUD operations
+Database Service: MS SQL Server hosting the AdventureWorks database
+Containerization: Docker for application and database
+CI/CD Pipeline: Jenkins automates build and deployment
+
+Accessing the Application
+
+API Endpoint: http://localhost:8080
+Swagger Documentation: http://localhost:8080/swagger (if configured)
+
+Contributing
+Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
+License
+This project is licensed under the MIT License - see the LICENSE.md file for details.
 
 
 
