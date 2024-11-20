@@ -163,16 +163,11 @@ docker-compose up --build
 3. **Containerization:** Docker for application and database services.  
 4. **CI/CD Pipeline:** Jenkins automates build and deployment processes.  
 
-### System Architecture Diagram
-![Architecture Diagram](https://link-to-your-diagram.com/architecture.png)
+
 
 ---
 
 ## API Documentation
 Swagger is integrated for interactive API documentation. Once the API is running, navigate to `http://localhost:8080/swagger` to explore and test the API endpoints.
 
----
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
