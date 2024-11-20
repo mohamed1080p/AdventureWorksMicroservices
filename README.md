@@ -170,6 +170,20 @@ Project Structure
 -------------------------------------------------------------------------------------------------------------------
 
 
+Step 3: Set Up MS SQL Server and AdventureWorks Database
+Install MS SQL Server:
+
+Download and install MS SQL Server.
+Download AdventureWorks Database:
+
+Download the AdventureWorks sample database from Microsoft.
+Attach the Database:
+
+Open SQL Server Management Studio (SSMS).
+Connect to your SQL Server instance.
+Right-click on Databases and select Attach.
+Browse and select the downloaded AdventureWorks.mdf file.
+Click OK to attach the database.
 
 
 
